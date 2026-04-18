@@ -2,6 +2,12 @@
 // PostalMS - Postal Service Management System
 // CST2550 Coursework - Middlesex University
 //
+// References:
+// Goodrich, M.T., Tamassia, R. and Goldwasser, M.H. (2013) Data Structures
+//   and Algorithms in Java. 6th edn. Wiley.
+//   -- FIFO Queue as singly linked list with front and rear pointers (Section 6.2)
+//   -- O(1) enqueue and dequeue using tail pointer (Section 6.2)
+//
 // Custom Queue implementation using a singly linked list.
 // Built from scratch without using any standard template library collections.
 // Processes delivery assignments in First In First Out (FIFO) order.

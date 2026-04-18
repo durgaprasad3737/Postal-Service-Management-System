@@ -2,6 +2,12 @@
 // PostalMS - Postal Service Management System
 // CST2550 Coursework - Middlesex University
 //
+// References:
+// Microsoft (2024c) MSTest documentation. Available at:
+//   https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-mstest
+// Cormen, T.H. et al. (2022) Introduction to Algorithms. 4th edn. MIT Press.
+//   -- Time complexity values used in test case design
+//
 // MSTest unit tests for all custom data structures and business logic.
 // 80 tests across 9 test classes:
 //   HashTableTests (12), BSTTests (13), QueueTests (10),

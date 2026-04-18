@@ -2,6 +2,13 @@
 // PostalMS - Postal Service Management System
 // CST2550 Coursework - Middlesex University
 //
+// References:
+// Cormen, T.H. et al. (2022) Introduction to Algorithms. 4th edn. MIT Press.
+// Knuth, D.E. (1998) The Art of Computer Programming, Vol 3. Addison-Wesley.
+//   -- Polynomial rolling hash function design (Section 6.4)
+//   -- Separate chaining collision resolution (Section 6.3)
+//   -- Load factor threshold of 0.75 for resize trigger
+//
 // Custom Hash Table implementation using chaining for collision resolution.
 // Built from scratch without using any standard template library collections.
 //

@@ -2,6 +2,13 @@
 // PostalMS - Postal Service Management System
 // CST2550 Coursework - Middlesex University
 //
+// References:
+// Cormen, T.H. et al. (2022) Introduction to Algorithms. 4th edn. MIT Press.
+// Sedgewick, R. and Wayne, K. (2011) Algorithms. 4th edn. Addison-Wesley.
+//   -- BST recursive insert, search and delete (Chapter 3)
+//   -- In-order traversal for sorted output (Section 3.2)
+//   -- In-order successor for delete with two children (Section 3.2)
+//
 // Custom Binary Search Tree implementation.
 // Built from scratch without using any standard template library collections.
 // Stores parcel tracking IDs in sorted order for efficient sorted display.

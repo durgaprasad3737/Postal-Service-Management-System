@@ -2,6 +2,11 @@
 // PostalMS - Postal Service Management System
 // CST2550 Coursework - Middlesex University
 //
+// References:
+// Russell, S. and Norvig, P. (2021) Artificial Intelligence: A Modern Approach.
+//   4th edn. Hoboken, NJ: Pearson.
+//   -- Rule-based AI agent design (Chapter 2)
+//
 // Offline AI assistant for parcel support queries.
 // Handles tracking, pricing, delivery estimates, stamps, drop off locations,
 // find us queries and FAQs entirely offline using keyword matching.

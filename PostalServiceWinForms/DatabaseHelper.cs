@@ -2,6 +2,12 @@
 // PostalMS - Postal Service Management System
 // CST2550 Coursework - Middlesex University
 //
+// References:
+// Microsoft (2024a) Stored Procedures (Database Engine). Available at:
+//   https://learn.microsoft.com/en-us/sql/relational-databases/stored-procedures
+// Microsoft (2024b) SqlConnection class. Available at:
+//   https://learn.microsoft.com/en-us/dotnet/api/system.data.sqlclient.sqlconnection
+//
 // Handles all database operations using SQL Server stored procedures and direct queries.
 // Also manages the three custom data structures (Hash Table, BST, Queue) which are
 // loaded from the database on startup and kept in sync with every add/update/delete.
