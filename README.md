@@ -130,7 +130,6 @@ custom data structures, the pricing logic, tracking ID generation and integratio
 
 ---
   
-
 ## Key Features
 - Send mail and packages domestically and internationally
 - Real-time parcel tracking using a custom Hash Table for O(1) lookup
@@ -161,9 +160,3 @@ All three data structures were built from scratch without using any
 standard template library collections.
 
 
----
-
-## Project Maintenance
--Documentation Updated: April 2026
-
--Database schema verified
