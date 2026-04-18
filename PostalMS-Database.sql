@@ -2,6 +2,7 @@
 -- PostalMS — Postal Service Management System
 -- Middlesex University CST2550
 -- Complete SQL Server Script
+-- Verified for SQL Server 2022 Compatibility - April 2026
 -- ============================================================
 
 USE master;
