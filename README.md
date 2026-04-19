@@ -1,6 +1,6 @@
 # PostalMS 
 
-A desktop postal service management app built with C# WinForms and SQL Server for our CST2550 coursework at Middlesex University.
+A desktop postal service management app built with C# WinForms and SQL Server for our CST2550 Software Engineering Management and Development coursework at Middlesex University.
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 
