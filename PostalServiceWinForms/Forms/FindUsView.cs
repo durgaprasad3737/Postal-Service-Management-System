@@ -138,7 +138,7 @@ namespace PostalServiceWinForms.Forms
 
         private void Build()
         {
-            int y = 0;
+            int y = 30;
 
             // Page header
             Panel header = new Panel { Location = new Point(0, y), Size = new Size(1400, 80), BackColor = Red };
@@ -150,7 +150,7 @@ namespace PostalServiceWinForms.Forms
             };
             header.Controls.Add(new Label { Text = "Find Us", Font = new Font("Segoe UI", 24, FontStyle.Bold), ForeColor = Color.White, Location = new Point(20, 18), Size = new Size(600, 42), BackColor = Color.Transparent });
             this.Controls.Add(header);
-            y += 90;
+            y += 100;
 
             // Detect user city
             string userCity = GetUserCity();
