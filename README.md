@@ -45,7 +45,7 @@ We built all three from scratch — no standard library collections.
 
 ## 78 unit tests, all passing
 
-HashTableTests (12) · BSTTests (13) · QueueTests (10) · PriceCalculationTests (9) · TrackingIDTests (6) · IntegrationTests (5) · GmailValidationTests (8) · StampPriceTests (6) · CityLocationTests (9)
+HashTableTests (12) · BSTTests (13) · QueueTests (10) · PriceCalculationTests (9) · TrackingIDTests (6) · IntegrationTests (5) · GmailValidationTests (9) · StampPriceTests (6) · CityLocationTests (8)
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 
