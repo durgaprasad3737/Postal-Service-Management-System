@@ -9,14 +9,11 @@
 // Price formula: (ServicePrice + Weight * 1.2) * SizeMultiplier * InternationalMultiplier
 
 using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
-using static System.Windows.Forms.AxHost;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
+using System.Data;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace PostalServiceWinForms.Forms
 {
@@ -155,7 +152,7 @@ namespace PostalServiceWinForms.Forms
             topBar.Controls.Add(btnRefund);
 
             // My Parcels panel
-            pnlList = new Panel { Dock = DockStyle.Fill, BackColor = Bg, Visible = true };
+            pnlList = new Panel { Dock = DockStyle.Fill, BackColor = Bg, Visible = true, AutoScroll = true };
             this.Controls.Add(pnlList);
             BuildParcelList();
 
@@ -359,25 +356,18 @@ namespace PostalServiceWinForms.Forms
                 string dropTid = tid;
                 bdrop.Click += (s2, e2) =>
                 {
-                    var dr = MessageBox.Show(
-                        "Confirm you have dropped off parcel " + dropTid + " at a PostalMS location.
-
-Once confirmed the status will update to In Transit.",
-                        "Confirm Drop Off", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    string dropMsg = "Confirm you have dropped off parcel " + dropTid + " at a PostalMS location. Once confirmed the status will update to In Transit.";
+                    var dr = MessageBox.Show(dropMsg, "Confirm Drop Off", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                     if (dr == DialogResult.Yes)
                     {
                         db.UpdateParcelStatus(dropTid, "In Transit");
-                        MessageBox.Show(
-                            "Drop off confirmed!
-
-Your parcel " + dropTid + " is now In Transit.
-You can track it in My Parcels.
-
-Estimated updates:
-  In Transit-- now
-  Out for Delivery-- 1 - 2 days before delivery
-  Delivered-- on your estimated delivery date",
-                            "Parcel In Transit", MessageBoxButtons.OK, MessageBoxIcon.Information) ;
+                        string confirmMsg = "Drop off confirmed! Your parcel " + dropTid + " is now In Transit." +
+                            "\n\nYou can track it in My Parcels." +
+                            "\n\nEstimated updates:" +
+                            "\n  In Transit -- now" +
+                            "\n  Out for Delivery -- 1-2 days before delivery" +
+                            "\n  Delivered -- on your estimated delivery date";
+                        MessageBox.Show(confirmMsg, "Parcel In Transit", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         RefreshParcels();
                     }
                 };
@@ -1090,42 +1080,24 @@ Estimated updates:
                 db.AutoAssignDelivery(tid, delID);
 
                 // Build packing slip and instructions
+                string step3 = _parcelPayOnline
+                    ? "3. Staff will scan and process your parcel"
+                    : "3. Pay GBP " + price.ToString("0.00") + " by cash or card at the counter";
                 string msg =
-                    "Parcel registered successfully!
-
-" +
-                    "Tracking ID:       " + tid + "
-" +
-                    "Type:              " + (isMail ? "Mail" : "Package") + "
-" +
-                    "Contents:          " + contents + "
-" +
-                    "Service:           " + svcName + "
-" +
-                    "Price:             GBP " + price.ToString("0.00") + "
-" +
-                    "Payment:           " + payment + "
-" +
-                    "Est. Delivery:     " + estDel.ToString("dd/MM/yyyy") + "
-
-" +
-                    "--- NEXT STEPS ---
-" +
-                    "1. Take your parcel to any PostalMS location
-" +
-                    "2. Show your Tracking ID: " + tid + "
-" +
-                    (_parcelPayOnline
-                       ? "3. Staff will scan and process your parcel
-"
-                       : "3. Pay GBP " + price.ToString("0.00") + " by cash or card at the counter
-") +
-                    "4. You will receive status updates in My Parcels
-
-" +
-                    "Click 'I Have Dropped Off My Parcel' in My Parcels
-once you have handed it to the store.";
-
+                    "Parcel registered successfully!" +
+                    "\n\nTracking ID:   " + tid +
+                    "\nType:          " + (isMail ? "Mail" : "Package") +
+                    "\nContents:      " + contents +
+                    "\nService:       " + svcName +
+                    "\nPrice:         GBP " + price.ToString("0.00") +
+                    "\nPayment:       " + payment +
+                    "\nEst. Delivery: " + estDel.ToString("dd/MM/yyyy") +
+                    "\n\n--- NEXT STEPS ---" +
+                    "\n1. Take your parcel to any PostalMS location" +
+                    "\n2. Show your Tracking ID: " + tid +
+                    "\n" + step3 +
+                    "\n4. You will receive status updates in My Parcels" +
+                    "\n\nClick the Drop Off button in My Parcels once you have handed it to the store.";
                 MessageBox.Show(msg, "Parcel Registered", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 // Reset form
@@ -1148,7 +1120,7 @@ once you have handed it to the store.";
         // Payment form for parcel submission
         private bool ShowParcelPaymentForm()
         {
-            Form f = new Form
+            System.Windows.Forms.Form f = new System.Windows.Forms.Form
             {
                 Text = "PostalMS -- Secure Payment",
                 Size = new Size(480, 530),
@@ -1167,27 +1139,27 @@ once you have handed it to the store.";
             f.Controls.Add(card);
 
             card.Controls.Add(new Label { Text = "CARDHOLDER NAME", Font = new Font("Segoe UI", 8, FontStyle.Bold), ForeColor = Color.Gray, Location = new Point(16, 16), Size = new Size(400, 16) });
-            var txtName = new TextBox { Location = new Point(16, 34), Size = new Size(400, 34), Font = new Font("Segoe UI", 11), BorderStyle = BorderStyle.FixedSingle, Text = "Full name as it appears on card", ForeColor = Color.LightGray };
+            System.Windows.Forms.TextBox txtName = new System.Windows.Forms.TextBox { Location = new Point(16, 34), Size = new Size(400, 34), Font = new Font("Segoe UI", 11), BorderStyle = BorderStyle.FixedSingle, Text = "Full name as it appears on card", ForeColor = Color.LightGray };
             txtName.Enter += (s, e2) => { if (txtName.ForeColor == Color.LightGray) { txtName.Text = ""; txtName.ForeColor = Color.Black; } };
             card.Controls.Add(txtName);
 
             card.Controls.Add(new Label { Text = "CARD NUMBER", Font = new Font("Segoe UI", 8, FontStyle.Bold), ForeColor = Color.Gray, Location = new Point(16, 84), Size = new Size(400, 16) });
-            var txtNum = new TextBox { Location = new Point(16, 102), Size = new Size(400, 34), Font = new Font("Segoe UI", 11), BorderStyle = BorderStyle.FixedSingle, Text = "1234 5678 9012 3456", ForeColor = Color.LightGray };
+            System.Windows.Forms.TextBox txtNum = new System.Windows.Forms.TextBox { Location = new Point(16, 102), Size = new Size(400, 34), Font = new Font("Segoe UI", 11), BorderStyle = BorderStyle.FixedSingle, Text = "1234 5678 9012 3456", ForeColor = Color.LightGray };
             txtNum.Enter += (s, e2) => { if (txtNum.ForeColor == Color.LightGray) { txtNum.Text = ""; txtNum.ForeColor = Color.Black; } };
             card.Controls.Add(txtNum);
 
             card.Controls.Add(new Label { Text = "EXPIRY DATE", Font = new Font("Segoe UI", 8, FontStyle.Bold), ForeColor = Color.Gray, Location = new Point(16, 152), Size = new Size(190, 16) });
-            var txtExp = new TextBox { Location = new Point(16, 170), Size = new Size(190, 34), Font = new Font("Segoe UI", 11), BorderStyle = BorderStyle.FixedSingle, Text = "MM/YY", ForeColor = Color.LightGray };
+            System.Windows.Forms.TextBox txtExp = new System.Windows.Forms.TextBox { Location = new Point(16, 170), Size = new Size(190, 34), Font = new Font("Segoe UI", 11), BorderStyle = BorderStyle.FixedSingle, Text = "MM/YY", ForeColor = Color.LightGray };
             txtExp.Enter += (s, e2) => { if (txtExp.ForeColor == Color.LightGray) { txtExp.Text = ""; txtExp.ForeColor = Color.Black; } };
             card.Controls.Add(txtExp);
 
             card.Controls.Add(new Label { Text = "CVV", Font = new Font("Segoe UI", 8, FontStyle.Bold), ForeColor = Color.Gray, Location = new Point(220, 152), Size = new Size(190, 16) });
-            var txtCVV = new TextBox { Location = new Point(220, 170), Size = new Size(190, 34), Font = new Font("Segoe UI", 11), BorderStyle = BorderStyle.FixedSingle, Text = "CVV", ForeColor = Color.LightGray, PasswordChar = '*' };
+            System.Windows.Forms.TextBox txtCVV = new System.Windows.Forms.TextBox { Location = new Point(220, 170), Size = new Size(190, 34), Font = new Font("Segoe UI", 11), BorderStyle = BorderStyle.FixedSingle, Text = "CVV", ForeColor = Color.LightGray, PasswordChar = '*' };
             txtCVV.Enter += (s, e2) => { if (txtCVV.ForeColor == Color.LightGray) { txtCVV.Text = ""; txtCVV.ForeColor = Color.Black; } };
             card.Controls.Add(txtCVV);
 
             card.Controls.Add(new Label { Text = "BILLING POSTCODE", Font = new Font("Segoe UI", 8, FontStyle.Bold), ForeColor = Color.Gray, Location = new Point(16, 220), Size = new Size(300, 16) });
-            var txtPost = new TextBox { Location = new Point(16, 238), Size = new Size(200, 34), Font = new Font("Segoe UI", 11), BorderStyle = BorderStyle.FixedSingle, Text = "e.g. NW4 4BT", ForeColor = Color.LightGray };
+            System.Windows.Forms.TextBox txtPost = new System.Windows.Forms.TextBox { Location = new Point(16, 238), Size = new Size(200, 34), Font = new Font("Segoe UI", 11), BorderStyle = BorderStyle.FixedSingle, Text = "e.g. NW4 4BT", ForeColor = Color.LightGray };
             txtPost.Enter += (s, e2) => { if (txtPost.ForeColor == Color.LightGray) { txtPost.Text = ""; txtPost.ForeColor = Color.Black; } };
             card.Controls.Add(txtPost);
 
@@ -1205,7 +1177,7 @@ once you have handed it to the store.";
             if (rbInternational.Checked && cboCountry.SelectedItem != null) bim = countries[cboCountry.SelectedItem.ToString()].mult;
             double bprice = Math.Round((bsvc + bw * 1.2) * bsm * bim, 2);
 
-            Button btnPay = new Button { Text = "Pay Now  GBP " + bprice.ToString("0.00"), Location = new Point(20, 442), Size = new Size(432, 50), Font = new Font("Segoe UI", 12, FontStyle.Bold), BackColor = Red, ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+            System.Windows.Forms.Button btnPay = new System.Windows.Forms.Button { Text = "Pay Now  GBP " + bprice.ToString("0.00"), Location = new Point(20, 442), Size = new Size(432, 50), Font = new Font("Segoe UI", 12, FontStyle.Bold), BackColor = Red, ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
             btnPay.FlatAppearance.BorderSize = 0;
             btnPay.Click += (s, e2) =>
             {
@@ -1224,7 +1196,7 @@ once you have handed it to the store.";
             };
             f.Controls.Add(btnPay);
 
-            Button btnCancel = new Button { Text = "Cancel", Location = new Point(358, 452), Size = new Size(94, 30), Font = new Font("Segoe UI", 9), BackColor = Color.FromArgb(240, 240, 240), ForeColor = Red, FlatStyle = FlatStyle.Flat };
+            System.Windows.Forms.Button btnCancel = new System.Windows.Forms.Button { Text = "Cancel", Location = new Point(358, 452), Size = new Size(94, 30), Font = new Font("Segoe UI", 9), BackColor = Color.FromArgb(240, 240, 240), ForeColor = Red, FlatStyle = FlatStyle.Flat };
             btnCancel.FlatAppearance.BorderSize = 0;
             btnCancel.Click += (s, e2) => f.Close();
             f.Controls.Add(btnCancel);
