@@ -8,6 +8,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Data;
 
 namespace PostalServiceWinForms.Forms
 {
@@ -17,9 +18,14 @@ namespace PostalServiceWinForms.Forms
         private Color Red = Color.FromArgb(180, 30, 30);
         private Color DarkRed = Color.FromArgb(140, 20, 20);
 
-        public HomeView(MainForm p)
+        private string userID;
+        private DatabaseHelper db;
+
+        public HomeView(MainForm p, string uid = "", DatabaseHelper dbHelper = null)
         {
             parent = p;
+            userID = uid;
+            db = dbHelper;
             this.Dock = DockStyle.Fill;
             this.BackColor = Color.FromArgb(245, 245, 245);
             this.AutoScroll = true;
@@ -57,6 +63,47 @@ namespace PostalServiceWinForms.Forms
             btnLearn.Click += (s, e) => parent.ShowInfo();
             hero.Controls.Add(btnLearn);
             y += 230;
+
+            // Parcel status notification banner
+            try
+            {
+                if (db != null && !string.IsNullOrEmpty(userID))
+                {
+                    var dt = db.GetParcelsByCustomer(userID);
+                    if (dt != null && dt.Rows.Count > 0)
+                    {
+                        // Find most recent parcel that is not delivered
+                        string notifTid = "--"; string notifStatus = "--";
+                        foreach (System.Data.DataRow dr in dt.Rows)
+                        {
+                            string s2 = dr["Status"]?.ToString() ?? "";
+                            if (s2 != "Delivered" && s2 != "Failed")
+                            {
+                                notifTid = dr["TrackingID"]?.ToString() ?? "--";
+                                notifStatus = s2;
+                                break;
+                            }
+                        }
+
+                        if (notifTid != "--")
+                        {
+                            Color notifColor = notifStatus == "In Transit" ? Color.FromArgb(235, 245, 255) :
+                                               notifStatus == "Out for Delivery" ? Color.FromArgb(235, 255, 235) :
+                                               Color.FromArgb(255, 245, 220);
+                            Color notifText = notifStatus == "In Transit" ? Color.FromArgb(20, 60, 140) :
+                                               notifStatus == "Out for Delivery" ? Color.FromArgb(20, 100, 40) :
+                                               Color.FromArgb(140, 80, 0);
+
+                            Panel notif = new Panel { Location = new Point(20, y), Size = new Size(900, 52), BackColor = notifColor };
+                            notif.Controls.Add(new Label { Text = "Parcel Update:  " + notifTid + "  is currently  " + notifStatus + ".  Go to My Parcels to view full details or confirm drop off.", Font = new Font("Segoe UI", 10), ForeColor = notifText, Location = new Point(14, 16), Size = new Size(870, 20), BackColor = Color.Transparent });
+                            this.Controls.Add(notif);
+                            y += 62;
+                        }
+                    }
+                }
+            }
+            catch { }
+
 
             // -- Trust stats bar
             Panel trust = new Panel { Location = new Point(0, y), Size = new Size(1400, 78), BackColor = Color.White };

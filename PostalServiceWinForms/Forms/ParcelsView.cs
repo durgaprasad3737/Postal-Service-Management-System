@@ -9,11 +9,14 @@
 // Price formula: (ServicePrice + Weight * 1.2) * SizeMultiplier * InternationalMultiplier
 
 using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Data;
-using System.Collections.Generic;
-using System.Diagnostics;
+using static System.Windows.Forms.AxHost;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
 
 namespace PostalServiceWinForms.Forms
 {
@@ -46,6 +49,8 @@ namespace PostalServiceWinForms.Forms
 
         private DatabaseHelper db;
         private string userID, userName;
+        private bool _parcelPayOnline = true;
+        private string _parcelContents = "";
         private Color Red = Color.FromArgb(180, 30, 30);
         private Color DarkRed = Color.FromArgb(140, 20, 20);
         private Color Bg = Color.FromArgb(245, 245, 245);
@@ -346,6 +351,39 @@ namespace PostalServiceWinForms.Forms
                 });
             }
 
+            // Drop Off button -- shown when status is Pending
+            if (st == "Pending")
+            {
+                Button bdrop = new Button { Text = "I Have Dropped Off My Parcel", Location = new Point(14, 158), Size = new Size(280, 36), Font = new Font("Segoe UI", 9, FontStyle.Bold), BackColor = Color.FromArgb(20, 130, 65), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
+                bdrop.FlatAppearance.BorderSize = 0;
+                string dropTid = tid;
+                bdrop.Click += (s2, e2) =>
+                {
+                    var dr = MessageBox.Show(
+                        "Confirm you have dropped off parcel " + dropTid + " at a PostalMS location.
+
+Once confirmed the status will update to In Transit.",
+                        "Confirm Drop Off", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (dr == DialogResult.Yes)
+                    {
+                        db.UpdateParcelStatus(dropTid, "In Transit");
+                        MessageBox.Show(
+                            "Drop off confirmed!
+
+Your parcel " + dropTid + " is now In Transit.
+You can track it in My Parcels.
+
+Estimated updates:
+  In Transit-- now
+  Out for Delivery-- 1 - 2 days before delivery
+  Delivered-- on your estimated delivery date",
+                            "Parcel In Transit", MessageBoxButtons.OK, MessageBoxIcon.Information) ;
+                        RefreshParcels();
+                    }
+                };
+                det.Controls.Add(bdrop);
+            }
+
             // Refund button
             if (st == "Failed" || st == "Delivered")
             {
@@ -639,6 +677,73 @@ namespace PostalServiceWinForms.Forms
             }
             y = ly + 130;
 
+            // Step 6 - Parcel Contents (Packing Slip)
+            SH("Step 6 -- What is in the parcel?", y); y += 36;
+            pnlSend.Controls.Add(new Label { Text = "CONTENTS DESCRIPTION (e.g. clothing, books, electronics)", Font = new Font("Segoe UI", 8, FontStyle.Bold), ForeColor = Color.Gray, Location = new Point(10, y), Size = new Size(700, 16) });
+            y += 18;
+            var txtContents = new TextBox
+            {
+                Location = new Point(10, y),
+                Size = new Size(900, 60),
+                Font = new Font("Segoe UI", 11),
+                BorderStyle = BorderStyle.FixedSingle,
+                Multiline = true,
+                Text = "Describe the contents of your parcel...",
+                ForeColor = Color.LightGray
+            };
+            txtContents.Enter += (s, e) => { if (txtContents.ForeColor == Color.LightGray) { txtContents.Text = ""; txtContents.ForeColor = Color.Black; } };
+            txtContents.Leave += (s, e) => { if (txtContents.Text == "") { txtContents.Text = "Describe the contents of your parcel..."; txtContents.ForeColor = Color.LightGray; } };
+            pnlSend.Controls.Add(txtContents);
+            y += 76;
+
+            // Step 7 - Payment Method
+            SH("Step 7 -- How would you like to pay?", y); y += 36;
+
+            // Pay Now card
+            Panel pnlPayNowCard = new Panel { Location = new Point(10, y), Size = new Size(340, 90), BackColor = Color.White, Cursor = Cursors.Hand };
+            pnlPayNowCard.Controls.Add(new Panel { Location = new Point(0, 0), Size = new Size(340, 5), BackColor = Red, Name = "bar" });
+            pnlPayNowCard.Controls.Add(new Label { Text = "Pay Now Online", Font = new Font("Segoe UI", 13, FontStyle.Bold), ForeColor = Red, Location = new Point(14, 14), Size = new Size(312, 26), BackColor = Color.Transparent });
+            pnlPayNowCard.Controls.Add(new Label { Text = "Pay by credit or debit card right now.", Font = new Font("Segoe UI", 9), ForeColor = Color.Gray, Location = new Point(14, 42), Size = new Size(312, 18), BackColor = Color.Transparent });
+            pnlPayNowCard.Controls.Add(new Label { Text = "Card charged immediately on submission.", Font = new Font("Segoe UI", 9, FontStyle.Bold), ForeColor = Color.FromArgb(20, 130, 65), Location = new Point(14, 62), Size = new Size(312, 18), BackColor = Color.Transparent });
+            pnlSend.Controls.Add(pnlPayNowCard);
+
+            // Pay In Store card
+            Panel pnlPayStoreCard = new Panel { Location = new Point(370, y), Size = new Size(340, 90), BackColor = Color.White, Cursor = Cursors.Hand };
+            pnlPayStoreCard.Controls.Add(new Panel { Location = new Point(0, 0), Size = new Size(340, 5), BackColor = Color.FromArgb(200, 180, 180), Name = "bar" });
+            pnlPayStoreCard.Controls.Add(new Label { Text = "Pay In Store", Font = new Font("Segoe UI", 13, FontStyle.Bold), ForeColor = Red, Location = new Point(14, 14), Size = new Size(312, 26), BackColor = Color.Transparent });
+            pnlPayStoreCard.Controls.Add(new Label { Text = "Reserve now and pay when you drop off.", Font = new Font("Segoe UI", 9), ForeColor = Color.Gray, Location = new Point(14, 42), Size = new Size(312, 18), BackColor = Color.Transparent });
+            pnlPayStoreCard.Controls.Add(new Label { Text = "Pay by cash or card at the PostalMS store.", Font = new Font("Segoe UI", 9, FontStyle.Bold), ForeColor = Color.FromArgb(180, 100, 0), Location = new Point(14, 62), Size = new Size(312, 18), BackColor = Color.Transparent });
+            pnlSend.Controls.Add(pnlPayStoreCard);
+
+            bool parcelPayOnline = true;
+            pnlPayNowCard.Controls["bar"].BackColor = Red;
+            pnlPayStoreCard.Controls["bar"].BackColor = Color.FromArgb(200, 180, 180);
+
+            Action selectPayNow = () =>
+            {
+                parcelPayOnline = true;
+                pnlPayNowCard.Controls["bar"].BackColor = Red;
+                pnlPayStoreCard.Controls["bar"].BackColor = Color.FromArgb(200, 180, 180);
+            };
+            Action selectPayStore = () =>
+            {
+                parcelPayOnline = false;
+                pnlPayNowCard.Controls["bar"].BackColor = Color.FromArgb(200, 180, 180);
+                pnlPayStoreCard.Controls["bar"].BackColor = Red;
+            };
+
+            pnlPayNowCard.Click += (s, e) => selectPayNow();
+            pnlPayStoreCard.Click += (s, e) => selectPayStore();
+            foreach (Control c in pnlPayNowCard.Controls) c.Click += (s, e) => selectPayNow();
+            foreach (Control c in pnlPayStoreCard.Controls) c.Click += (s, e) => selectPayStore();
+            y += 110;
+
+            // Pay in store info
+            Panel payStoreInfo = new Panel { Location = new Point(10, y), Size = new Size(700, 46), BackColor = Color.FromArgb(255, 245, 220) };
+            payStoreInfo.Controls.Add(new Label { Text = "Bring your parcel to any PostalMS location. Show your tracking ID at the counter and pay by cash or card. Staff will pack and process your parcel.", Font = new Font("Segoe UI", 9), ForeColor = Color.FromArgb(140, 80, 0), Location = new Point(12, 10), Size = new Size(676, 26), BackColor = Color.Transparent });
+            pnlSend.Controls.Add(payStoreInfo);
+            y += 56;
+
             // Submit button
             Button btnSubmit = new Button
             {
@@ -654,7 +759,13 @@ namespace PostalServiceWinForms.Forms
             btnSubmit.FlatAppearance.BorderSize = 0;
             btnSubmit.MouseEnter += (s, e) => btnSubmit.BackColor = DarkRed;
             btnSubmit.MouseLeave += (s, e) => btnSubmit.BackColor = Red;
-            btnSubmit.Click += Submit_Click;
+            btnSubmit.Click += (s, e) =>
+            {
+                // Store payment choice and contents for Submit_Click to use
+                _parcelPayOnline = parcelPayOnline;
+                _parcelContents = txtContents.ForeColor == Color.LightGray ? "" : txtContents.Text.Trim();
+                Submit_Click(s, e);
+            };
             pnlSend.Controls.Add(btnSubmit);
 
             Recalc();
@@ -913,10 +1024,7 @@ namespace PostalServiceWinForms.Forms
             // Validate email
             string email = txtSenderEmail?.Text.Trim() ?? "";
             if (!email.EndsWith("@gmail.com") || email.Length <= "@gmail.com".Length)
-            {
-                MessageBox.Show("Please enter a valid Gmail address.\nExample: yourname@gmail.com", "Invalid Email", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            { MessageBox.Show("Please enter a valid Gmail address.", "Invalid Email", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
 
             if (string.IsNullOrWhiteSpace(txtRcvName?.Text))
             { MessageBox.Show("Please enter the receiver name.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
@@ -926,6 +1034,13 @@ namespace PostalServiceWinForms.Forms
 
             if (!double.TryParse(txtWeight?.Text, out double w) || w <= 0)
             { MessageBox.Show("Please enter a valid weight in kg.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+
+            // If paying online show bank details form first
+            if (_parcelPayOnline)
+            {
+                bool paid = ShowParcelPaymentForm();
+                if (!paid) return;
+            }
 
             // Build parcel details
             string sz = cboSize.SelectedItem.ToString();
@@ -960,6 +1075,8 @@ namespace PostalServiceWinForms.Forms
             string tid = "PS-" + DateTime.Now.Year + "-" + (db.GetParcelCount() + 1).ToString("D5");
             string delID = "DEL-" + (db.GetParcelCount() + 1).ToString("D3");
             DateTime estDel = DateTime.Now.AddDays(days);
+            string contents = string.IsNullOrEmpty(_parcelContents) ? "Not specified" : _parcelContents;
+            string payment = _parcelPayOnline ? "Paid Online" : "Pay In Store";
 
             string result = db.AddParcel(tid, userID,
                 isMail ? "Mail" : "Package",
@@ -971,27 +1088,149 @@ namespace PostalServiceWinForms.Forms
             if (result.Contains("successfully"))
             {
                 db.AutoAssignDelivery(tid, delID);
-                MessageBox.Show(
-                    "Parcel submitted successfully!\n\n" +
-                    "Tracking ID: " + tid + "\n" +
-                    "Price: GBP " + price.ToString("0.00") + "\n" +
-                    "Estimated delivery: " + estDel.ToString("dd/MM/yyyy") + "\n\n" +
-                    "Drop off your parcel at any PostalMS location.\n" +
-                    "Go to the Send form and click Get Directions to find your nearest drop off point.",
-                    "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                // Build packing slip and instructions
+                string msg =
+                    "Parcel registered successfully!
+
+" +
+                    "Tracking ID:       " + tid + "
+" +
+                    "Type:              " + (isMail ? "Mail" : "Package") + "
+" +
+                    "Contents:          " + contents + "
+" +
+                    "Service:           " + svcName + "
+" +
+                    "Price:             GBP " + price.ToString("0.00") + "
+" +
+                    "Payment:           " + payment + "
+" +
+                    "Est. Delivery:     " + estDel.ToString("dd/MM/yyyy") + "
+
+" +
+                    "--- NEXT STEPS ---
+" +
+                    "1. Take your parcel to any PostalMS location
+" +
+                    "2. Show your Tracking ID: " + tid + "
+" +
+                    (_parcelPayOnline
+                       ? "3. Staff will scan and process your parcel
+"
+                       : "3. Pay GBP " + price.ToString("0.00") + " by cash or card at the counter
+") +
+                    "4. You will receive status updates in My Parcels
+
+" +
+                    "Click 'I Have Dropped Off My Parcel' in My Parcels
+once you have handed it to the store.";
+
+                MessageBox.Show(msg, "Parcel Registered", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 // Reset form
                 txtRcvName.Text = "";
                 txtRcvAddr.Text = "";
                 txtSenderEmail.Text = "";
                 txtWeight.Text = "1.0";
+                _parcelContents = "";
                 Recalc();
                 RefreshTrackID();
+                Switch("list");
+                RefreshParcels();
             }
             else
             {
                 MessageBox.Show(result, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        // Payment form for parcel submission
+        private bool ShowParcelPaymentForm()
+        {
+            Form f = new Form
+            {
+                Text = "PostalMS -- Secure Payment",
+                Size = new Size(480, 530),
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                StartPosition = FormStartPosition.CenterParent,
+                MaximizeBox = false,
+                MinimizeBox = false,
+                BackColor = Color.FromArgb(245, 245, 245)
+            };
+            Panel hdr = new Panel { Dock = DockStyle.Top, Height = 60, BackColor = Red };
+            hdr.Controls.Add(new Label { Text = "Secure Payment", Font = new Font("Segoe UI", 14, FontStyle.Bold), ForeColor = Color.White, Location = new Point(16, 14), Size = new Size(300, 28), BackColor = Color.Transparent });
+            hdr.Controls.Add(new Label { Text = "Your card details are encrypted and secure", Font = new Font("Segoe UI", 9), ForeColor = Color.FromArgb(255, 200, 200), Location = new Point(16, 38), Size = new Size(400, 18), BackColor = Color.Transparent });
+            f.Controls.Add(hdr);
+
+            Panel card = new Panel { Location = new Point(20, 76), Size = new Size(432, 350), BackColor = Color.White };
+            f.Controls.Add(card);
+
+            card.Controls.Add(new Label { Text = "CARDHOLDER NAME", Font = new Font("Segoe UI", 8, FontStyle.Bold), ForeColor = Color.Gray, Location = new Point(16, 16), Size = new Size(400, 16) });
+            var txtName = new TextBox { Location = new Point(16, 34), Size = new Size(400, 34), Font = new Font("Segoe UI", 11), BorderStyle = BorderStyle.FixedSingle, Text = "Full name as it appears on card", ForeColor = Color.LightGray };
+            txtName.Enter += (s, e2) => { if (txtName.ForeColor == Color.LightGray) { txtName.Text = ""; txtName.ForeColor = Color.Black; } };
+            card.Controls.Add(txtName);
+
+            card.Controls.Add(new Label { Text = "CARD NUMBER", Font = new Font("Segoe UI", 8, FontStyle.Bold), ForeColor = Color.Gray, Location = new Point(16, 84), Size = new Size(400, 16) });
+            var txtNum = new TextBox { Location = new Point(16, 102), Size = new Size(400, 34), Font = new Font("Segoe UI", 11), BorderStyle = BorderStyle.FixedSingle, Text = "1234 5678 9012 3456", ForeColor = Color.LightGray };
+            txtNum.Enter += (s, e2) => { if (txtNum.ForeColor == Color.LightGray) { txtNum.Text = ""; txtNum.ForeColor = Color.Black; } };
+            card.Controls.Add(txtNum);
+
+            card.Controls.Add(new Label { Text = "EXPIRY DATE", Font = new Font("Segoe UI", 8, FontStyle.Bold), ForeColor = Color.Gray, Location = new Point(16, 152), Size = new Size(190, 16) });
+            var txtExp = new TextBox { Location = new Point(16, 170), Size = new Size(190, 34), Font = new Font("Segoe UI", 11), BorderStyle = BorderStyle.FixedSingle, Text = "MM/YY", ForeColor = Color.LightGray };
+            txtExp.Enter += (s, e2) => { if (txtExp.ForeColor == Color.LightGray) { txtExp.Text = ""; txtExp.ForeColor = Color.Black; } };
+            card.Controls.Add(txtExp);
+
+            card.Controls.Add(new Label { Text = "CVV", Font = new Font("Segoe UI", 8, FontStyle.Bold), ForeColor = Color.Gray, Location = new Point(220, 152), Size = new Size(190, 16) });
+            var txtCVV = new TextBox { Location = new Point(220, 170), Size = new Size(190, 34), Font = new Font("Segoe UI", 11), BorderStyle = BorderStyle.FixedSingle, Text = "CVV", ForeColor = Color.LightGray, PasswordChar = '*' };
+            txtCVV.Enter += (s, e2) => { if (txtCVV.ForeColor == Color.LightGray) { txtCVV.Text = ""; txtCVV.ForeColor = Color.Black; } };
+            card.Controls.Add(txtCVV);
+
+            card.Controls.Add(new Label { Text = "BILLING POSTCODE", Font = new Font("Segoe UI", 8, FontStyle.Bold), ForeColor = Color.Gray, Location = new Point(16, 220), Size = new Size(300, 16) });
+            var txtPost = new TextBox { Location = new Point(16, 238), Size = new Size(200, 34), Font = new Font("Segoe UI", 11), BorderStyle = BorderStyle.FixedSingle, Text = "e.g. NW4 4BT", ForeColor = Color.LightGray };
+            txtPost.Enter += (s, e2) => { if (txtPost.ForeColor == Color.LightGray) { txtPost.Text = ""; txtPost.ForeColor = Color.Black; } };
+            card.Controls.Add(txtPost);
+
+            Panel sec = new Panel { Location = new Point(16, 288), Size = new Size(400, 36), BackColor = Color.FromArgb(235, 245, 255) };
+            sec.Controls.Add(new Label { Text = "Secure encrypted payment. We do not store your card details.", Font = new Font("Segoe UI", 8), ForeColor = Color.FromArgb(20, 60, 140), Location = new Point(10, 10), Size = new Size(380, 16), BackColor = Color.Transparent });
+            card.Controls.Add(sec);
+
+            bool paid = false;
+            // Calculate price for button label
+            double bw = 1.0; double.TryParse(txtWeight?.Text ?? "1", out bw);
+            string bsz = cboSize?.SelectedItem?.ToString() ?? "Small";
+            double bsm = bsz == "Small" ? 1.0 : bsz == "Medium" ? 1.5 : 2.5;
+            double bsvc = isMail ? new double[] { 1.99, 3.99, 6.99 }[mailSvcIndex] : new double[] { 2.99, 5.99, 9.99, 14.99 }[pkgSvcIndex];
+            double bim = 1.0;
+            if (rbInternational.Checked && cboCountry.SelectedItem != null) bim = countries[cboCountry.SelectedItem.ToString()].mult;
+            double bprice = Math.Round((bsvc + bw * 1.2) * bsm * bim, 2);
+
+            Button btnPay = new Button { Text = "Pay Now  GBP " + bprice.ToString("0.00"), Location = new Point(20, 442), Size = new Size(432, 50), Font = new Font("Segoe UI", 12, FontStyle.Bold), BackColor = Red, ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+            btnPay.FlatAppearance.BorderSize = 0;
+            btnPay.Click += (s, e2) =>
+            {
+                string cn = txtName.ForeColor == Color.LightGray ? "" : txtName.Text.Trim();
+                string cc = txtNum.ForeColor == Color.LightGray ? "" : txtNum.Text.Trim();
+                string ce = txtExp.ForeColor == Color.LightGray ? "" : txtExp.Text.Trim();
+                string cv = txtCVV.ForeColor == Color.LightGray ? "" : txtCVV.Text.Trim();
+                string cp = txtPost.ForeColor == Color.LightGray ? "" : txtPost.Text.Trim();
+                if (string.IsNullOrEmpty(cn)) { MessageBox.Show("Please enter the cardholder name.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+                if (string.IsNullOrEmpty(cc)) { MessageBox.Show("Please enter your card number.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+                if (string.IsNullOrEmpty(ce)) { MessageBox.Show("Please enter the expiry date.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+                if (string.IsNullOrEmpty(cv)) { MessageBox.Show("Please enter the CVV.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+                if (string.IsNullOrEmpty(cp)) { MessageBox.Show("Please enter your billing postcode.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+                paid = true;
+                f.Close();
+            };
+            f.Controls.Add(btnPay);
+
+            Button btnCancel = new Button { Text = "Cancel", Location = new Point(358, 452), Size = new Size(94, 30), Font = new Font("Segoe UI", 9), BackColor = Color.FromArgb(240, 240, 240), ForeColor = Red, FlatStyle = FlatStyle.Flat };
+            btnCancel.FlatAppearance.BorderSize = 0;
+            btnCancel.Click += (s, e2) => f.Close();
+            f.Controls.Add(btnCancel);
+
+            f.ShowDialog();
+            return paid;
         }
     }
 }
