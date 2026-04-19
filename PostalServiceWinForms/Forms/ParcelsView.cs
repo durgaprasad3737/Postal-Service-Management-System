@@ -433,11 +433,20 @@ namespace PostalServiceWinForms.Forms
             pnlSend.Controls.AddRange(new Control[] { rbDomestic, rbInternational });
             y += 36;
 
-            // UK city selector -- shown when UK Domestic is selected
-            pnlSend.Controls.Add(new Label { Text = "DESTINATION CITY (UK)", Font = new Font("Segoe UI", 8, FontStyle.Bold), ForeColor = Color.Gray, Location = new Point(10, y), Size = new Size(300, 16), Name = "lblUKCity" });
+            // Step 3 destination container -- fixed height so Step 4 never overlaps
+            Panel pnlStep3 = new Panel
+            {
+                Location = new Point(10, y),
+                Size = new Size(1240, 120),
+                BackColor = Color.Transparent
+            };
+            pnlSend.Controls.Add(pnlStep3);
+
+            // UK city label and dropdown -- inside fixed container
+            var lblUKCity2 = new Label { Text = "DESTINATION CITY (UK)", Font = new Font("Segoe UI", 8, FontStyle.Bold), ForeColor = Color.Gray, Location = new Point(0, 0), Size = new Size(300, 16), Visible = true };
             var cboUKCity = new ComboBox
             {
-                Location = new Point(10, y + 18),
+                Location = new Point(0, 18),
                 Size = new Size(360, 34),
                 Font = new Font("Segoe UI", 11),
                 DropDownStyle = ComboBoxStyle.DropDownList,
@@ -453,13 +462,13 @@ namespace PostalServiceWinForms.Forms
             };
             foreach (string city in ukCities) cboUKCity.Items.Add(city);
             cboUKCity.SelectedIndex = 0;
-            pnlSend.Controls.Add(cboUKCity);
+            pnlStep3.Controls.AddRange(new Control[] { lblUKCity2, cboUKCity });
 
-            // International country selector -- shown when International is selected
-            pnlSend.Controls.Add(new Label { Text = "DESTINATION COUNTRY", Font = new Font("Segoe UI", 8, FontStyle.Bold), ForeColor = Color.Gray, Location = new Point(10, y), Size = new Size(300, 16), Name = "lblIntlCountry", Visible = false });
+            // International country label and dropdown -- inside fixed container
+            var lblIntl2 = new Label { Text = "DESTINATION COUNTRY", Font = new Font("Segoe UI", 8, FontStyle.Bold), ForeColor = Color.Gray, Location = new Point(0, 0), Size = new Size(300, 16), Visible = false };
             cboCountry = new ComboBox
             {
-                Location = new Point(10, y + 18),
+                Location = new Point(0, 18),
                 Size = new Size(360, 34),
                 Font = new Font("Segoe UI", 11),
                 DropDownStyle = ComboBoxStyle.DropDownList,
@@ -468,13 +477,13 @@ namespace PostalServiceWinForms.Forms
             foreach (var k in countries.Keys) cboCountry.Items.Add(k);
             cboCountry.SelectedIndex = 0;
             cboCountry.SelectedIndexChanged += (s, e) => Recalc();
-            pnlSend.Controls.Add(cboCountry);
+            pnlStep3.Controls.AddRange(new Control[] { lblIntl2, cboCountry });
 
-            // International zone info panel
+            // International zone info -- inside fixed container
             pnlIntlSection = new Panel
             {
-                Location = new Point(10, y + 60),
-                Size = new Size(1240, 44),
+                Location = new Point(0, 64),
+                Size = new Size(1220, 40),
                 BackColor = Color.FromArgb(242, 255, 242),
                 Visible = false
             };
@@ -483,45 +492,36 @@ namespace PostalServiceWinForms.Forms
                 Text = "Zone 1 Europe x1.8  |  Zone 2 N.Europe x2.2  |  Zone 3 USA/UAE x3.0  |  Zone 4 World x3.5-3.8",
                 Font = new Font("Segoe UI", 9),
                 ForeColor = Color.FromArgb(20, 80, 40),
-                Location = new Point(12, 12),
-                Size = new Size(1210, 20),
+                Location = new Point(12, 10),
+                Size = new Size(1200, 20),
                 BackColor = Color.Transparent
             });
-            pnlSend.Controls.Add(pnlIntlSection);
+            pnlStep3.Controls.Add(pnlIntlSection);
 
-            // Toggle between UK and International controls
+            // Toggle between UK and International -- only affects controls inside pnlStep3
             rbDomestic.CheckedChanged += (s, e) =>
             {
                 bool dom = rbDomestic.Checked;
+                lblUKCity2.Visible = dom;
                 cboUKCity.Visible = dom;
+                lblIntl2.Visible = !dom;
                 cboCountry.Visible = !dom;
                 pnlIntlSection.Visible = !dom;
-
-                // Show/hide labels
-                foreach (Control ctrl in pnlSend.Controls)
-                {
-                    if (ctrl.Name == "lblUKCity") ctrl.Visible = dom;
-                    if (ctrl.Name == "lblIntlCountry") ctrl.Visible = !dom;
-                }
                 Recalc();
             };
             rbInternational.CheckedChanged += (s, e) =>
             {
                 bool dom = rbDomestic.Checked;
+                lblUKCity2.Visible = dom;
                 cboUKCity.Visible = dom;
+                lblIntl2.Visible = !dom;
                 cboCountry.Visible = !dom;
                 pnlIntlSection.Visible = !dom;
-
-                foreach (Control ctrl in pnlSend.Controls)
-                {
-                    if (ctrl.Name == "lblUKCity") ctrl.Visible = dom;
-                    if (ctrl.Name == "lblIntlCountry") ctrl.Visible = !dom;
-                }
                 Recalc();
             };
 
-            // Move y down enough to clear both the dropdowns and the zone info panel
-            y += 120;
+            // Step 4 always starts exactly 130px below Step 3 heading
+            y += 130;
 
             // Step 4 - Full Receiver Details
             SH("Step 4 -- Receiver Details", y); y += 36;

@@ -1,8 +1,16 @@
--- ============================================================
+-- PostalMS-Database.sql
+-- PostalMS - Postal Service Management System
+-- CST2550 Coursework - Middlesex University
+--
+-- References:
+-- Microsoft (2024a) Stored Procedures (Database Engine). Available at:
+--   https://learn.microsoft.com/en-us/sql/relational-databases/stored-procedures
+-- Microsoft (2024d) SQL Server 2022 documentation. Available at:
+--   https://learn.microsoft.com/en-us/sql/sql-server
+
 -- PostalMS — Postal Service Management System
 -- Middlesex University CST2550
 -- Complete SQL Server Script
--- Verified for SQL Server 2022 Compatibility - April 2026
 -- ============================================================
 
 USE master;
