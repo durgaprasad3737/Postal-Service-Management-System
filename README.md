@@ -6,15 +6,14 @@ A desktop postal service management app built with C# WinForms and SQL Server fo
 
 ## Who built this
 
-**The Leftovers** — Middlesex University
+**The Leftovers** — Middlesex University, April 2026
 
-- **Durga** (M01038074) — Team lead, built everything
+- **Durga** (M01038074) — Team lead, built pretty much everything
 - **Meet** (M01000862) — Documentation and secretary
 - **Tapan** (M01050963) — Development support and video demo
 - **Forhad** (M01044942) — Testing, wrote all 78 unit tests
 
--------------------------------------------------------------------------------------------------------------------------------------------
-
+--------------------------------------------------------------------------------------------------------------------------------------------
 
 ## What can it do
 
@@ -30,8 +29,7 @@ A desktop postal service management app built with C# WinForms and SQL Server fo
 
 **AI Assistant** — ask it anything. Track a parcel, get a price estimate, find a drop-off point. All offline, no internet needed.
 
--------------------------------------------------------------------------------------------------------------------------------------------
-
+--------------------------------------------------------------------------------------------------------------------------------------------
 
 ## The three custom data structures
 
@@ -43,15 +41,13 @@ We built all three from scratch — no standard library collections.
 
 **Queue** — deliveries processed in the order they come in. O(1) for everything.
 
--------------------------------------------------------------------------------------------------------------------------------------------
-
+--------------------------------------------------------------------------------------------------------------------------------------------
 
 ## 78 unit tests, all passing
 
 HashTableTests (12) · BSTTests (13) · QueueTests (10) · PriceCalculationTests (9) · TrackingIDTests (6) · IntegrationTests (5) · GmailValidationTests (8) · StampPriceTests (6) · CityLocationTests (8)
 
--------------------------------------------------------------------------------------------------------------------------------------------
-
+--------------------------------------------------------------------------------------------------------------------------------------------
 
 ## How to run it
 
@@ -67,22 +63,19 @@ HashTableTests (12) · BSTTests (13) · QueueTests (10) · PriceCalculationTests
 
 > All accounts must use Gmail. That's enforced throughout the app.
 
--------------------------------------------------------------------------------------------------------------------------------------------
-
+--------------------------------------------------------------------------------------------------------------------------------------------
 
 ## Video demonstration
 
 The video demonstration is located in the root of the repository as `PostalMS_Demo.mp4`
 
--------------------------------------------------------------------------------------------------------------------------------------------
-
+--------------------------------------------------------------------------------------------------------------------------------------------
 
 ## Stack
 
 C# · .NET Framework 4.7.2 · WinForms · SQL Server 2022 · MSTest · Visual Studio 2022
 
--------------------------------------------------------------------------------------------------------------------------------------------
-
+--------------------------------------------------------------------------------------------------------------------------------------------
 
 ## Connection string
 
@@ -90,41 +83,53 @@ C# · .NET Framework 4.7.2 · WinForms · SQL Server 2022 · MSTest · Visual St
 Server=localhost;Database=PostalServiceDB;Trusted_Connection=True;TrustServerCertificate=True;
 ```
 
--------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------
 
-
-## Project structure
+## Repository structure
 
 ```
-📁 PostalServiceWinForms
-    📁 DataStructures
-        CustomHashTable.cs
-        CustomBST.cs
-        CustomQueue.cs
-    📁 Forms
-        HomeView.cs
-        ParcelsView.cs
-        DeliveriesView.cs
-        StampsView.cs
-        FindUsView.cs
-        ProfileView.cs
-        HelpView.cs
-        InfoView.cs
-        DataStructuresView.cs
-        AIAssistantPanel.cs
-    DatabaseHelper.cs
-    LoginForm.cs
-    RegisterForm.cs
-    MainForm.cs
-    Program.cs
-
-📁 PostalServiceWinForms.Tests
-    PostalMSTests.cs
-
-📁 docs
-    (all supporting documents)
-
-PostalMS-Database.sql
-PostalMS_Demo.mp4
-README.md
+📁 Postal-Service-Management-System
+│
+├── 📁 PostalServiceWinForms          ← Main application source code
+│   ├── 📁 DataStructures
+│   │   ├── CustomHashTable.cs
+│   │   ├── CustomBST.cs
+│   │   └── CustomQueue.cs
+│   ├── 📁 Forms
+│   │   ├── HomeView.cs
+│   │   ├── ParcelsView.cs
+│   │   ├── DeliveriesView.cs
+│   │   ├── StampsView.cs
+│   │   ├── FindUsView.cs
+│   │   ├── ProfileView.cs
+│   │   ├── HelpView.cs
+│   │   ├── InfoView.cs
+│   │   ├── DataStructuresView.cs
+│   │   └── AIAssistantPanel.cs
+│   ├── DatabaseHelper.cs
+│   ├── LoginForm.cs
+│   ├── RegisterForm.cs
+│   ├── MainForm.cs
+│   └── Program.cs
+│
+├── 📁 PostalServiceWinForms.Tests    ← Unit tests
+│   └── PostalMSTests.cs
+│
+├── 📁 design                         ← Design documents
+│   ├── PostalMS_Pseudocode.pdf
+│   ├── PostalMS_TimeComplexity.pdf
+│   ├── ClassDiagram.png
+│   └── Database.erd
+│
+├── 📁 docs                           ← Project management documents
+│   ├── PostalMS_SprintPlanning.pdf
+│   └── PostalMS_UnitTesting_Report.pdf
+│
+├── 📁 meetings                       ← Meeting minutes
+│   └── PostalMS_MeetingMinutes.pdf
+│
+├── PostalMS-Database.sql             ← SQL database script
+├── PostalMS_Demo.mp4                 ← Video demonstration
+├── PostalMS_Report.pdf               ← Full project report
+└── README.md
 ```
